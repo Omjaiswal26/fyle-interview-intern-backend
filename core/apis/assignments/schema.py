@@ -1,9 +1,9 @@
-from marshmallow import Schema, EXCLUDE, fields, post_load
+from marshmallow import Schema, EXCLUDE, fields, post_load, ValidationError, validates  # Added `validates` import
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow_enum import EnumField
 from core.models.assignments import Assignment, GradeEnum
 from core.libs.helpers import GeneralObject
-
+from core.models.teachers import Teacher
 
 class AssignmentSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -21,8 +21,12 @@ class AssignmentSchema(SQLAlchemyAutoSchema):
 
     @post_load
     def initiate_class(self, data_dict, many, partial):
-        # pylint: disable=unused-argument,no-self-use
         return Assignment(**data_dict)
+
+    @validates('content')
+    def validate_content(self, value):
+        if value is None:
+            raise ValidationError("Content cannot be null.")
 
 
 class AssignmentSubmitSchema(Schema):
@@ -34,7 +38,6 @@ class AssignmentSubmitSchema(Schema):
 
     @post_load
     def initiate_class(self, data_dict, many, partial):
-        # pylint: disable=unused-argument,no-self-use
         return GeneralObject(**data_dict)
 
 
@@ -47,5 +50,19 @@ class AssignmentGradeSchema(Schema):
 
     @post_load
     def initiate_class(self, data_dict, many, partial):
-        # pylint: disable=unused-argument,no-self-use
         return GeneralObject(**data_dict)
+
+
+class TeacherSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Teacher
+        unknown = EXCLUDE
+
+    id = auto_field(required=True)
+    user_id = auto_field(required=True)
+    created_at = auto_field(dump_only=True)
+    updated_at = auto_field(dump_only=True)
+
+    @post_load
+    def initiate_class(self, data_dict, many, partial):
+        return Teacher(**data_dict)

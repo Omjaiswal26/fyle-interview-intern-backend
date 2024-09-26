@@ -2,7 +2,6 @@ import pytest
 import json
 from tests import app
 
-
 @pytest.fixture
 def client():
     return app.test_client()
@@ -36,8 +35,8 @@ def h_student_2():
 def h_teacher_1():
     headers = {
         'X-Principal': json.dumps({
-            'teacher_id': 1,
-            'user_id': 3
+            "teacher_id": 1,
+            "user_id": 3
         })
     }
 

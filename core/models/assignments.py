@@ -89,5 +89,25 @@ class Assignment(db.Model):
         return cls.filter(cls.student_id == student_id).all()
 
     @classmethod
-    def get_assignments_by_teacher(cls):
-        return cls.query.all()
+    def get_assignments_by_teacher(cls, teacher_id):
+        return cls.filter(cls.teacher_id == teacher_id).all() or []
+
+    @classmethod
+    def get_all_graded_and_submitted_assignments(cls):
+        query = cls.query
+        return query.filter(cls.state.in_([AssignmentStateEnum.SUBMITTED, AssignmentStateEnum.GRADED]))
+
+
+    @classmethod
+    def get_submitted_assignments_by_student(cls, student_id):
+        return cls.filter(cls.student_id == student_id, cls.state == AssignmentStateEnum.SUBMITTED).all()
+
+
+    @classmethod
+    def delete(cls, assignment_id):
+        # Fetch the assignment by ID
+        assignment = cls.get_by_id(assignment_id)
+        assertions.assert_found(assignment, 'No assignment with this id was found')
+
+        # Delete the assignment from the session
+        db.session.delete(assignment)
